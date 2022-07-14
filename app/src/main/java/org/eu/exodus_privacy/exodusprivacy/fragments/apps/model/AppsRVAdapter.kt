@@ -1,20 +1,22 @@
 package org.eu.exodus_privacy.exodusprivacy.fragments.apps.model
 
-import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toDrawable
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.chip.Chip
 import org.eu.exodus_privacy.exodusprivacy.R
 import org.eu.exodus_privacy.exodusprivacy.databinding.RecyclerViewAppItemBinding
 import org.eu.exodus_privacy.exodusprivacy.fragments.apps.AppsFragmentDirections
+import org.eu.exodus_privacy.exodusprivacy.fragments.trackerdetail.TrackerDetailFragmentDirections
 import org.eu.exodus_privacy.exodusprivacy.manager.database.app.ExodusApplication
+import org.eu.exodus_privacy.exodusprivacy.utils.setExodusColor
+import org.eu.exodus_privacy.exodusprivacy.utils.setVersionReport
 
-class AppsRVAdapter : ListAdapter<ExodusApplication, AppsRVAdapter.ViewHolder>(AppsDiffUtil()) {
+class AppsRVAdapter(
+    private val currentDestinationId: Int
+) : ListAdapter<ExodusApplication, AppsRVAdapter.ViewHolder>(AppsDiffUtil()) {
 
     inner class ViewHolder(val binding: RecyclerViewAppItemBinding) :
         RecyclerView.ViewHolder(binding.root)
@@ -35,8 +37,13 @@ class AppsRVAdapter : ListAdapter<ExodusApplication, AppsRVAdapter.ViewHolder>(A
 
         holder.binding.apply {
             root.setOnClickListener {
-                val action =
+                val action = if (currentDestinationId == R.id.appsFragment) {
                     AppsFragmentDirections.actionAppsFragmentToAppDetailFragment(app.packageName)
+                } else {
+                    TrackerDetailFragmentDirections.actionTrackerDetailFragmentToAppDetailFragment(
+                        app.packageName
+                    )
+                }
                 it.findNavController().navigate(action)
             }
             appIconIV.background = app.icon.toDrawable(context.resources)
@@ -44,7 +51,7 @@ class AppsRVAdapter : ListAdapter<ExodusApplication, AppsRVAdapter.ViewHolder>(A
             appVersionTV.text = context.getString(R.string.app_version, app.versionName)
             trackersChip.apply {
                 val trackerNum = app.exodusTrackers.size
-                text = trackerNum.toString()
+                text = if (app.exodusVersionCode == 0L) "?" else trackerNum.toString()
                 setExodusColor(trackerNum)
             }
             permsChip.apply {
@@ -52,24 +59,7 @@ class AppsRVAdapter : ListAdapter<ExodusApplication, AppsRVAdapter.ViewHolder>(A
                 text = permsNum.toString()
                 setExodusColor(permsNum)
             }
-            versionChip.chipIcon = when (app.exodusVersionCode) {
-                app.versionCode -> ContextCompat.getDrawable(context, R.drawable.ic_match)
-                0L -> ContextCompat.getDrawable(context, R.drawable.ic_unavailable)
-                else -> ContextCompat.getDrawable(context, R.drawable.ic_mismatch)
-            }
+            versionChip.setVersionReport(app)
         }
-    }
-
-    private fun Chip.setExodusColor(size: Int) {
-        val colorRed = ContextCompat.getColor(context, R.color.colorRedLight)
-        val colorYellow = ContextCompat.getColor(context, R.color.colorYellow)
-        val colorGreen = ContextCompat.getColor(context, R.color.colorGreen)
-
-        val colorStateList = when (size) {
-            0 -> ColorStateList.valueOf(colorGreen)
-            in 1..4 -> ColorStateList.valueOf(colorYellow)
-            else -> ColorStateList.valueOf(colorRed)
-        }
-        this.chipBackgroundColor = colorStateList
     }
 }

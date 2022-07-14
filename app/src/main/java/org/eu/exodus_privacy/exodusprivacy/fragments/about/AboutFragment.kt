@@ -11,12 +11,16 @@ import dagger.hilt.android.AndroidEntryPoint
 import org.eu.exodus_privacy.exodusprivacy.BuildConfig
 import org.eu.exodus_privacy.exodusprivacy.R
 import org.eu.exodus_privacy.exodusprivacy.databinding.FragmentAboutBinding
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class AboutFragment : PreferenceFragmentCompat() {
 
     private var _binding: FragmentAboutBinding? = null
     private val binding get() = _binding!!
+
+    @Inject
+    lateinit var customTabsIntent: CustomTabsIntent
 
     companion object {
         private const val privacyPolicyURL = "https://exodus-privacy.eu.org/en/page/privacy-policy"
@@ -32,14 +36,11 @@ class AboutFragment : PreferenceFragmentCompat() {
 
         val type = BuildConfig.BUILD_TYPE.replaceFirstChar { it.uppercase() }
         binding.appVersionTV.text =
-            getString(R.string.version, type, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE)
+            getString(R.string.version_info, type, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE)
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.about_preference, rootKey)
-
-        // Set appropriate CustomTabsIntent for respective preferences
-        val customTabsIntent = CustomTabsIntent.Builder().build()
 
         findPreference<Preference>("website")?.setOnPreferenceClickListener {
             customTabsIntent.launchUrl(it.context, Uri.parse(websiteURL))

@@ -1,19 +1,20 @@
 package org.eu.exodus_privacy.exodusprivacy.fragments.apps
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.PopupMenu
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import dagger.hilt.android.AndroidEntryPoint
-import org.eu.exodus_privacy.exodusprivacy.MainActivityViewModel
+import org.eu.exodus_privacy.exodusprivacy.ExodusUpdateService
 import org.eu.exodus_privacy.exodusprivacy.R
 import org.eu.exodus_privacy.exodusprivacy.databinding.FragmentAppsBinding
 import org.eu.exodus_privacy.exodusprivacy.fragments.apps.model.AppsRVAdapter
-import org.eu.exodus_privacy.exodusprivacy.objects.Status
 
 @AndroidEntryPoint
 class AppsFragment : Fragment(R.layout.fragment_apps) {
@@ -24,14 +25,14 @@ class AppsFragment : Fragment(R.layout.fragment_apps) {
     private val binding get() = _binding!!
 
     private val viewModel: AppsViewModel by viewModels()
-    private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentAppsBinding.bind(view)
 
         // Setup menu actions
-        val toolbar = binding.toolbar
+        val toolbar = binding.toolbarApps
+        toolbar.menu.clear()
         toolbar.inflateMenu(R.menu.apps_menu)
         toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
@@ -50,40 +51,55 @@ class AppsFragment : Fragment(R.layout.fragment_apps) {
         }
 
         // Setup RecyclerView
-        val appsRVAdapter = AppsRVAdapter()
+        val appsRVAdapter = AppsRVAdapter(findNavController().currentDestination!!.id)
         binding.appListRV.apply {
             adapter = appsRVAdapter
             layoutManager = LinearLayoutManager(view.context)
         }
 
-        mainActivityViewModel.dbStatus.observe(viewLifecycleOwner) {
-            when (it) {
-                Status.RUNNING_TRACKER -> {
-                    binding.setupTV.text = view.context.getString(R.string.fetching_trackers)
-                    binding.setupPB.visibility = View.VISIBLE
-                    binding.setupTV.visibility = View.VISIBLE
-                }
-                Status.RUNNING_APPS -> {
-                    binding.setupTV.text = view.context.getString(R.string.fetching_apps)
-                }
-                Status.COMPLETED_APPS -> {
-                    binding.setupPB.visibility = View.GONE
-                    binding.setupTV.visibility = View.GONE
-                }
-                else -> Log.d(TAG, "Got an unhandled status: $it")
-            }
+        // Setup Shimmer Layout
+        for (num in 1..10) {
+            val parent = binding.shimmerPlaceHolderLayout
+            val shimmerLayout = LayoutInflater.from(view.context)
+                .inflate(R.layout.shimmer_layout_app_item, parent, false)
+            parent.addView(shimmerLayout)
         }
 
         viewModel.appList.observe(viewLifecycleOwner) {
             if (!it.isNullOrEmpty()) {
-                binding.appListRV.visibility = View.VISIBLE
+                binding.swipeRefreshLayout.visibility = View.VISIBLE
+                binding.shimmerLayout.visibility = View.GONE
                 appsRVAdapter.submitList(it)
+            } else {
+                binding.shimmerLayout.visibility = View.VISIBLE
+            }
+        }
+
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            binding.swipeRefreshLayout.isRefreshing = false
+            if (!ExodusUpdateService.IS_SERVICE_RUNNING) {
+                val intent = Intent(view.context, ExodusUpdateService::class.java)
+                intent.apply {
+                    action = ExodusUpdateService.START_SERVICE
+                    activity?.startService(this)
+                }
             }
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        binding.shimmerLayout.startShimmer()
+    }
+
+    override fun onPause() {
+        binding.shimmerLayout.stopShimmer()
+        super.onPause()
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
+        binding.toolbarApps.setOnMenuItemClickListener(null)
         _binding = null
     }
 }

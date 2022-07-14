@@ -8,42 +8,48 @@
     tools:theme="@style/Theme.Exodus">
 
     <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar"
+        android:id="@+id/toolbarApps"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:title="@string/title_apps" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/appListRV"
+    <com.facebook.shimmer.ShimmerFrameLayout
+        android:id="@+id/shimmerLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/toolbar"
-        android:scrollbars="vertical"
-        android:visibility="gone" />
-
-    <com.google.android.material.progressindicator.LinearProgressIndicator
-        android:id="@+id/setupPB"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:indeterminate="true"
-        android:paddingHorizontal="20dp"
+        android:layout_below="@+id/toolbarApps"
+        android:orientation="vertical"
         android:visibility="gone"
-        app:indicatorColor="@color/indicatorColor"
-        app:trackCornerRadius="50dp"
-        app:trackThickness="5dp" />
+        app:shimmer_direction="left_to_right">
 
-    <TextView
-        android:id="@+id/setupTV"
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:id="@+id/shimmerPlaceHolderLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+            </LinearLayout>
+        </ScrollView>
+
+    </com.facebook.shimmer.ShimmerFrameLayout>
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:visibility="gone"
+        android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/setupPB"
-        android:layout_marginTop="10dp"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:textAlignment="center"
-        android:textColor="?android:textColorPrimary"
-        android:textSize="18sp"
-        android:visibility="gone" />
+        android:layout_height="match_parent"
+        android:layout_below="@+id/toolbarApps">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/appListRV"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="vertical" />
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </RelativeLayout>

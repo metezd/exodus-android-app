@@ -16,10 +16,10 @@ interface TrackerDataDao {
     @Query("SELECT * FROM trackerdata WHERE id=:id")
     suspend fun getTrackers(id: Int): List<TrackerData>
 
-    @Query("SELECT * FROM trackerdata")
+    @Query("SELECT * FROM trackerdata WHERE presentOnDevice = 1")
     fun getAllTrackers(): LiveData<List<TrackerData>>
 
-    @Query("SELECT * FROM trackerdata WHERE id IN (:listOfID)")
+    @Query("SELECT * FROM trackerdata WHERE id IN (:listOfID) ORDER BY name")
     suspend fun getTrackers(listOfID: List<Int>): List<TrackerData>
 
     @Delete

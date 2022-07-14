@@ -8,6 +8,7 @@
     android:layout_marginBottom="5dp"
     android:clickable="true"
     android:focusable="true"
+    android:foreground="?android:attr/selectableItemBackground"
     android:padding="10dp"
     tools:theme="@style/Theme.Exodus">
 
@@ -58,7 +59,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:ellipsize="end"
-                android:maxLines="1"
+                android:maxLines="2"
                 android:textColor="?android:textColorSecondary"
                 android:textSize="14sp"
                 tools:text="3.0.0" />
@@ -75,21 +76,14 @@
         tools:ignore="RtlSymmetry">
 
         <com.google.android.material.chip.Chip
-            android:id="@+id/versionChip"
-            style="@style/Theme.Exodus.Chip"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:chipIcon="@drawable/ic_match"
-            app:textEndPadding="0dp"
-            app:textStartPadding="0dp" />
-
-        <com.google.android.material.chip.Chip
             android:id="@+id/trackersChip"
             style="@style/Theme.Exodus.Chip"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@color/textColorDark"
             app:chipIcon="@drawable/ic_tracker"
-            app:chipIconTint="@color/colorPrimary"
+            app:chipIconTint="@color/textColorDark"
+            tools:chipBackgroundColor="@color/colorGreen"
             tools:text="0" />
 
         <com.google.android.material.chip.Chip
@@ -98,9 +92,20 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="5dp"
-            app:chipIcon="@drawable/ic_list"
-            app:chipIconTint="@color/colorPrimary"
+            android:textColor="@color/textColorDark"
+            app:chipIcon="@drawable/ic_permission"
+            app:chipIconTint="@color/textColorDark"
+            tools:chipBackgroundColor="@color/colorYellow"
             tools:text="3" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/versionChip"
+            style="@style/Theme.Exodus.Chip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:chipIcon="@drawable/ic_match"
+            app:textEndPadding="0dp"
+            app:textStartPadding="0dp" />
     </LinearLayout>
 
 </RelativeLayout>
